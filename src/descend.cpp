@@ -64,12 +64,54 @@ value GetE() {
     return number1;
 }
 
+// value GetT( ) {
+
+//     SkipSpaces(&string);
+//     printf("I am GetT, i got such string: <%s>\n", string);
+
+//     value number1 = GetP();
+//     if (number1.err_flag) {
+//         return number1;
+//     }
+//     while (*string == '*' || *string == '/') {
+
+//         int save_symb = *string;
+//         string++;
+//         printf("Calling GetP, current string: <%s>\n", string);
+
+//         value number2 = GetP();
+//         if (number2.err_flag) {
+//             return number2;
+//         }
+//         if (save_symb == '*') {
+//             number1.data *= number2.data;
+//         }
+//         else {
+//             if (IsEqual(number2.data, 0)) {
+//                 // printf("AAAAAAAAAAAAAAAA\n");
+//                 number1.err_flag = DIVISION_BY_ZERO;
+//                 return number1;
+//             }
+//                 printf("AAAAAAAAAAAAAAAA\n");
+
+//             number1.data /= number2.data;
+
+//         }
+//         SkipSpaces(&string);
+
+
+//     }
+//     printf("I am GetT, RETURN string: <%s>\n", string);
+
+//     return number1;
+// }
+
 value GetT( ) {
 
     SkipSpaces(&string);
     printf("I am GetT, i got such string: <%s>\n", string);
 
-    value number1 = GetP();
+    value number1 = GetS();
     if (number1.err_flag) {
         return number1;
     }
@@ -79,7 +121,7 @@ value GetT( ) {
         string++;
         printf("Calling GetP, current string: <%s>\n", string);
 
-        value number2 = GetP();
+        value number2 = GetS();
         if (number2.err_flag) {
             return number2;
         }
@@ -102,6 +144,37 @@ value GetT( ) {
 
     }
     printf("I am GetT, RETURN string: <%s>\n", string);
+
+    return number1;
+}
+
+value  GetS() {
+
+    SkipSpaces(&string);
+    printf("I am GetS, i got such string: <%s>\n", string);
+
+    value number1 = GetP();
+    if (number1.err_flag) {
+        return number1;
+    }
+    
+    while (*string == '^') {
+
+        int save_symb = *string;
+        string++;
+        printf("Calling GetP, current string: <%s>\n", string);
+
+        value number2 = GetP();
+        if (number2.err_flag) {
+            return number2;
+        }
+        if (save_symb == '^') {
+            number1.data = pow(number1.data, number2.data);
+        }
+
+        SkipSpaces(&string);
+    }
+    printf("I am GetS, RETURN string: <%s>\n", string);
 
     return number1;
 }
@@ -138,15 +211,37 @@ value GetN() {
 
     value ret_data   = {};
     int inside_cicle = 0;
+    int is_nagative  = 0;
+
+    if (*string == '-') {
+        is_nagative = 1;
+        string++;
+    }
+
     while (isdigit(*string)) { 
         inside_cicle  = 1;
         ret_data.data = ret_data.data*10 + (*string - '0');
         string++;
+        //if floating point number
+        if (*string == '.') {
+            int divider = 10;
+            string++;
+            while(isdigit(*string)) {
+                ret_data.data += (*string - '0') / (elem_t)divider;
+                divider *= 10;
+                string++;
+            }
+            break;
+        }
     } 
 
+    if (is_nagative) {
+        ret_data.data *= -1;
+    }
     if (!inside_cicle) {
         ret_data.err_flag = UNEXPECTED_SYMBOL;
     }
+
     SkipSpaces(&string);
 
     printf("I am GetN, i RETURN such string: <%s>\n", string);

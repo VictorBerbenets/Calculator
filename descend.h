@@ -25,6 +25,7 @@ enum Errors {
 elem_t GetG();
 value  GetE();
 value  GetT();
+value  GetS();
 value  GetP();
 value  GetN();
 
