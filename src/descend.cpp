@@ -64,48 +64,6 @@ value GetE() {
     return number1;
 }
 
-// value GetT( ) {
-
-//     SkipSpaces(&string);
-//     printf("I am GetT, i got such string: <%s>\n", string);
-
-//     value number1 = GetP();
-//     if (number1.err_flag) {
-//         return number1;
-//     }
-//     while (*string == '*' || *string == '/') {
-
-//         int save_symb = *string;
-//         string++;
-//         printf("Calling GetP, current string: <%s>\n", string);
-
-//         value number2 = GetP();
-//         if (number2.err_flag) {
-//             return number2;
-//         }
-//         if (save_symb == '*') {
-//             number1.data *= number2.data;
-//         }
-//         else {
-//             if (IsEqual(number2.data, 0)) {
-//                 // printf("AAAAAAAAAAAAAAAA\n");
-//                 number1.err_flag = DIVISION_BY_ZERO;
-//                 return number1;
-//             }
-//                 printf("AAAAAAAAAAAAAAAA\n");
-
-//             number1.data /= number2.data;
-
-//         }
-//         SkipSpaces(&string);
-
-
-//     }
-//     printf("I am GetT, RETURN string: <%s>\n", string);
-
-//     return number1;
-// }
-
 value GetT( ) {
 
     SkipSpaces(&string);
