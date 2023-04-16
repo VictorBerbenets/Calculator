@@ -1,10 +1,19 @@
 #include "..//descend.h"
 
-const char* string = "52 * 10   + 5 *(90 +11 - 1)+  25";
+const char* string = NULL;
 
-int main () {
+int main (int argc, char** argv) {
+    if (argc > 2) {
+        printf("Too many file names, there can be only one:)\n");
+        return -1;
+    }    
 
-    printf("%lg\n", GetG());
+    char* save_alloc_addr = GetData(argv[1]);
+    string = save_alloc_addr;
+
+    printf("( %s ) = %lg\n", save_alloc_addr, GetG());
+
+    free(save_alloc_addr);
     return 0;
 }
 
@@ -18,6 +27,10 @@ elem_t GetG() {
         printf("Error: didn't get end simbol <%s>\n", string);
         exit(EXIT_FAILURE);
     }
+    if (number.err_flag) {
+        PrintError(number.err_flag);
+        exit(number.err_flag);
+    }
     return number.data;
 }
 
@@ -27,12 +40,18 @@ value GetE() {
     printf("I am GetE, i got such string: <%s>\n", string);
 
     value number1 = GetT();
+    if (number1.err_flag) {
+        return number1;
+    }
     while (*string == '+' || *string == '-') {
         int save_symb = *string;
         string++;
         printf("Calling GetT, current string: <%s>\n", string);
 
         value number2 = GetT();
+        if (number2.err_flag) {
+            return number2;
+        }
         if (save_symb == '+') {
             number1.data += number2.data;
         }
@@ -51,7 +70,9 @@ value GetT( ) {
     printf("I am GetT, i got such string: <%s>\n", string);
 
     value number1 = GetP();
-
+    if (number1.err_flag) {
+        return number1;
+    }
     while (*string == '*' || *string == '/') {
 
         int save_symb = *string;
@@ -59,12 +80,22 @@ value GetT( ) {
         printf("Calling GetP, current string: <%s>\n", string);
 
         value number2 = GetP();
-
+        if (number2.err_flag) {
+            return number2;
+        }
         if (save_symb == '*') {
             number1.data *= number2.data;
         }
         else {
+            if (IsEqual(number2.data, 0)) {
+                // printf("AAAAAAAAAAAAAAAA\n");
+                number1.err_flag = DIVISION_BY_ZERO;
+                return number1;
+            }
+                printf("AAAAAAAAAAAAAAAA\n");
+
             number1.data /= number2.data;
+
         }
         SkipSpaces(&string);
 
@@ -76,7 +107,7 @@ value GetT( ) {
 }
 
 value GetP() {
-
+    
     SkipSpaces(&string);
     printf("I am GetP, i got such string: <%s>\n", string);
     if (*string == '(') {
@@ -85,7 +116,7 @@ value GetP() {
         value data = GetE();
         if (*string != ')') {
             printf("Close bracket is missed: %s\n", string);
-            data.err_flag = 1;
+            data.err_flag = MISSING_CLOSE_BRACKET;
         }
         else {
             string++;
@@ -107,14 +138,14 @@ value GetN() {
 
     value ret_data   = {};
     int inside_cicle = 0;
-    while ('0' <= *string && *string <= '9') {
+    while (isdigit(*string)) { 
         inside_cicle  = 1;
         ret_data.data = ret_data.data*10 + (*string - '0');
         string++;
     } 
 
     if (!inside_cicle) {
-        ret_data.err_flag = 1;
+        ret_data.err_flag = UNEXPECTED_SYMBOL;
     }
     SkipSpaces(&string);
 
@@ -131,4 +162,18 @@ void SkipSpaces(const char** string) {
     }
     printf("String in SkipSpaces after: <%s>\n", *string);
 
+}
+
+int IsEqual(elem_t num1, elem_t num2) {
+    const static elem_t Epsilon = 1e-17;
+    return fabs(num1 - num2) <= Epsilon;
+}
+
+void PrintError(int err_id) {
+    switch(err_id) {
+        case MISSING_CLOSE_BRACKET: printf("Missing close bracket: <%s>\n", string);   break;
+        case DIVISION_BY_ZERO:      printf("Trying to divide by '0': <%s>\n", string); break;
+        case UNEXPECTED_SYMBOL:     printf("Unexpected symbol: <%s>\n", string);       break;
+        default: printf("invalid err_id: %d\n", err_id);
+    }
 }

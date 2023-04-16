@@ -5,16 +5,18 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+static const int MAX_FILE_SIZE = 500;
 
-size_t GetFileSize (const char *file) { 
-    
+char* GetData (const char *file) { 
     Validator(!file, "invalid file name", exit(EXIT_FAILURE););
 
-    struct stat buf = {};
-    if (stat(file, &buf)) {
+    FILE* data_file = fopen(file, "r");
 
-        fprintf(stderr, "\n" Red "error" Gray "!!!\nFile <%s>: in function <%s>,  in line '%d' - error in function \"stat\"\n\n", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-        return -1;
-    }
-    return buf.st_size;
+    char* ret_string = (char*) calloc(MAX_FILE_SIZE, sizeof(char));
+    fgets(ret_string, MAX_FILE_SIZE, data_file);
+    printf("strlen(ret_string) = %d\n", strlen(ret_string));
+    ret_string[strlen(ret_string) - 1] = '\0';
+    fclose(data_file);
+
+    return (char*) ret_string;
 }

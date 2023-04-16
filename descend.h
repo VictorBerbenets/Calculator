@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <string.h>
 #include <ctype.h>
+#include <math.h>
 
 
 typedef double elem_t;
@@ -15,6 +15,12 @@ typedef struct {
     int err_flag  = 0;
 }value;
 
+enum Errors {
+
+    DIVISION_BY_ZERO      = 1,
+    MISSING_CLOSE_BRACKET = 2,
+    UNEXPECTED_SYMBOL     = 3,
+};
 
 elem_t GetG();
 value  GetE();
@@ -24,6 +30,9 @@ value  GetN();
 
 void SkipSpaces(const char** string);
 
-size_t GetFileSize (const char *file);
+char* GetData (const char *file);
 
+int IsEqual(elem_t num1, elem_t num2);
+
+void PrintError(int err_id);
 #endif
