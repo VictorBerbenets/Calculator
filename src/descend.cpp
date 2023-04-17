@@ -1,21 +1,19 @@
 #include "..//descend.h"
 
-const char* string = NULL;
-
 typedef struct {
     const char func_name[MaxFuncSize];
     int func_id;
 } FuncInfo;
 
 enum FUNCTIONS {
-    SIN = 0,
-    COS = 1,
-    TG  = 2,
-    CTG = 3,
-    SH  = 4,
-    CH  = 5,
-    TH  = 6,
-    CTH = 7,
+    SIN    = 0,
+    COS    = 1,
+    TG     = 2,
+    CTG    = 3,
+    SH     = 4,
+    CH     = 5,
+    TH     = 6,
+    CTH    = 7,
     ARCSIN = 8,
     ARCCOS = 9,
     ARCTG  = 10,
@@ -34,49 +32,55 @@ int main (int argc, char** argv) {
     }    
 
     char* save_alloc_addr = GetData(argv[1]);
-    string = save_alloc_addr;
+    char* string = save_alloc_addr;
 
-    printf("( %s ) = %lg\n", save_alloc_addr, GetG());
+    printf("( %s ) = %lg\n", save_alloc_addr, GetG(&string));
 
     free(save_alloc_addr);
     return 0;
 }
 
-elem_t GetG() {
+elem_t GetG(char** string) {
 
-    SkipSpaces(&string);
-    printf("I am GetG, i got such string: <%s>\n", string);
-    if(!strlen(string)) {
+    SkipSpaces(string);
+    printf("I am GetG, i got such string: <%s>\n", *string);
+    if(!strlen(*string)) {
         printf("String is empty\n");
         exit(EXIT_FAILURE);
     }
-    value number = GetE();
-    if (*string != '\0') {
-        printf("Error: didn't get end simbol <%s>\n", string);
+    value number = GetE(string);
+    if (**string != '\0') {
+        printf("Error: didn't get end simbol <%s>\n", *string);
         exit(EXIT_FAILURE);
     }
     if (number.err_flag) {
-        PrintError(number.err_flag);
+        PrintError(number.err_flag, *string);
         exit(number.err_flag);
     }
     return number.data;
 }
 
-value GetE() {
+value GetE(char** string) {
 
-    SkipSpaces(&string);
-    printf("I am GetE, i got such string: <%s>\n", string);
+    SkipSpaces(string);
+    printf("I am GetE, i got such string: <%s>\n", *string);
 
-    value number1 = GetT();
+    value number1 = GetT(string);
+    fprintf(stderr, "line = %d\n", __LINE__);
+
+    printf("I am GetE, i got such string after GetT: <%s>\n", *string);
+
     if (number1.err_flag) {
         return number1;
     }
-    while (*string == '+' || *string == '-') {
-        int save_symb = *string;
-        string++;
-        printf("Calling GetT, current string: <%s>\n", string);
+    while (**string == '+' || **string == '-') {
+        int save_symb = **string;
+        (*string)++;
+        printf("Calling GetT, current string: <%s>\n", *string);
 
-        value number2 = GetT();
+        value number2 = GetT(string);
+        printf("I am GetE, i got such string after GetT: <%s>\n", *string);
+
         if (number2.err_flag) {
             return number2;
         }
@@ -86,28 +90,30 @@ value GetE() {
         else {
             number1.data -= number2.data;
         }
+
     }
-    printf("I am GetE, RETURN string: <%s>\n", string);
+    // printf("I am GetE, RETURN string: <%s>\n", *string);
+        fprintf(stderr, "line = %d\n", __LINE__);
 
     return number1;
 }
 
-value GetT( ) {
+value GetT(char** string) {
 
-    SkipSpaces(&string);
-    printf("I am GetT, i got such string: <%s>\n", string);
+    SkipSpaces(string);
+    printf("I am GetT, i got such string: <%s>\n", *string);
 
-    value number1 = GetS();
+    value number1 = GetS(string);
     if (number1.err_flag) {
         return number1;
     }
-    while (*string == '*' || *string == '/') {
+    while (**string == '*' || **string == '/') {
 
-        int save_symb = *string;
-        string++;
-        printf("Calling GetS, current string: <%s>\n", string);
+        int save_symb = **string;
+        (*string)++;
+        printf("Calling GetS, current string: <%s>\n", *string);
 
-        value number2 = GetS();
+        value number2 = GetS(string);
         if (number2.err_flag) {
             return number2;
         }
@@ -121,30 +127,30 @@ value GetT( ) {
             }
             number1.data /= number2.data;
         }
-        SkipSpaces(&string);
+        SkipSpaces(string);
     }
-    printf("I am GetT, RETURN string: <%s>\n", string);
+    printf("I am GetT, RETURN string: <%s>\n", *string);
 
     return number1;
 }
 
-value  GetS() {
+value  GetS(char** string) {
 
-    SkipSpaces(&string);
-    printf("I am GetS, i got such string: <%s>\n", string);
+    SkipSpaces(string);
+    printf("I am GetS, i got such string: <%s>\n", *string);
 
-    value number1 = GetP();
+    value number1 = GetP(string);
     if (number1.err_flag) {
         return number1;
     }
     
-    while (*string == '^') {
+    while (**string == '^') {
 
-        int save_symb = *string;
-        string++;
-        printf("Calling GetP, current string: <%s>\n", string);
+        int save_symb = **string;
+        (*string)++;
+        printf("Calling GetP, current string: <%s>\n", *string);
 
-        value number2 = GetP();
+        value number2 = GetP(string);
         if (number2.err_flag) {
             return number2;
         }
@@ -152,71 +158,71 @@ value  GetS() {
             number1.data = pow(number1.data, number2.data);
         }
 
-        SkipSpaces(&string);
+        SkipSpaces(string);
     }
-    printf("I am GetS, RETURN string: <%s>\n", string);
+    printf("I am GetS, RETURN string: <%s>\n", *string);
 
     return number1;
 }
 
-value GetP() {
+value GetP(char** string) {
     
-    SkipSpaces(&string);
-    printf("I am GetP, i got such string: <%s>\n", string);
-    if (*string == '(') {
-        string++;
-        printf("Calling GetE, current string: <%s>\n", string);
-        value data = GetE();
-        if (*string != ')') {
-            printf("Close bracket is missed: %s\n", string);
+    SkipSpaces(string);
+    printf("I am GetP, i got such string: <%s>\n", *string);
+    if (**string == '(') {
+        (*string)++;
+        printf("Calling GetE, current string: <%s>\n", *string);
+        value data = GetE(string);
+        if (**string != ')') {
+            printf("Close bracket is missed: %s\n", *string);
             data.err_flag = MISSING_CLOSE_BRACKET;
         }
         else {
-            string++;
+            (*string)++;
         }
-        SkipSpaces(&string);
+        SkipSpaces(string);
 
-        printf("I am GetP, RETURN string: <%s>\n", string);
+        printf("I am GetP, RETURN string: <%s>\n", *string);
 
         return data;
     }
-    if (isdigit(*string)) {
-        printf("I am GetP,I call GetN, RETURN string: <%s>\n", string);
-        return GetN();
+    if (isdigit(**string)) {
+        printf("I am GetP,I call GetN, RETURN string: <%s>\n", *string);
+        return GetN(string);
     }
-    if (isalpha((*string))) {
-        printf("I am GetP,I call GetF, RETURN string: <%s>\n", string);
+    if (isalpha((**string))) {
+        printf("I am GetP,I call GetF, RETURN string: <%s>\n", *string);
 
-        return GetF();
+        return GetF(string);
     }
 }
 
-value GetF() {
+value GetF(char** string) {
     char function_name[MaxFuncSize] = {};
     int symbol_counter = 0;
-    for( ; isalpha(*string) && symbol_counter < 100; symbol_counter++) {
-        function_name[symbol_counter] = *string;
-        *string++;
+    for( ; isalpha(**string) && symbol_counter < 100; symbol_counter++) {
+        function_name[symbol_counter] = **string;
+        (*string)++;
     }
     value data = {};
     if (symbol_counter == MaxFuncSize) {
         data.err_flag = INVALID_FUNCTION_NAME_SIZE;
     }
     int func_id = GetFuncId(function_name);
-    if (*string == '(') {
-        string++;
+    if (**string == '(') {
+        (*string)++;
         printf("Calling GetE, current string: <%s>\n", string);
-        data = GetE();
-        if (*string != ')') {
-            printf("Close bracket is missed: %s\n", string);
+        data = GetE(string);
+        if (**string != ')') {
+            printf("Close bracket is missed: %s\n", *string);
             data.err_flag = MISSING_CLOSE_BRACKET;
         }
         else {
-            string++;
+            (*string)++;
         }
-        SkipSpaces(&string);
+        SkipSpaces(string);
         data.data = CalculateFunc(data.data, func_id);
-        printf("I am GetP, RETURN string: <%s>\n", string);
+        printf("I am GetP, RETURN string: <%s>\n", *string);
         return data;
     }
     else {
@@ -225,37 +231,37 @@ value GetF() {
     }
 }
 
-value GetN() {
+value GetN(char** string) {
 
-    SkipSpaces(&string);
-    printf("I am GetN, i got such string: <%s>\n", string);
+    SkipSpaces(string);
+    printf("I am GetN, i got such string: <%s>\n", *string);
 
     value ret_data   = {};
     int inside_cicle = 0;
     int is_nagative  = 0;
 
-    if (*string == '-') {
+    if (**string == '-') {
         is_nagative = 1;
-        string++;
+        (*string)++;
     }
-    if (*string == 'P') {
+    if (**string == 'P') {
         ret_data.data = M_PI;
-        string++;
-        SkipSpaces(&string);
+        (*string)++;
+        SkipSpaces(string);
         return ret_data;
     }
-    while (isdigit(*string)) { 
+    while (isdigit(**string)) { 
         inside_cicle  = 1;
-        ret_data.data = ret_data.data*10 + (*string - '0');
-        string++;
+        ret_data.data = ret_data.data*10 + (**string - '0');
+        (*string)++;
         //if floating point number
-        if (*string == '.') {
+        if (**string == '.') {
             int divider = 10;
-            string++;
-            while(isdigit(*string)) {
-                ret_data.data += (*string - '0') / (elem_t)divider;
+            (*string)++;
+            while(isdigit(**string)) {
+                ret_data.data += (**string - '0') / (elem_t)divider;
                 divider *= 10;
-                string++;
+                (*string)++;
             }
             break;
         }
@@ -268,15 +274,15 @@ value GetN() {
         ret_data.err_flag = UNEXPECTED_SYMBOL;
     }
 
-    SkipSpaces(&string);
+    SkipSpaces(string);
 
-    printf("I am GetN, i RETURN such string: <%s>\n", string);
+    printf("I am GetN, i RETURN such string: <%s>\n", *string);
     printf("ret value by GetN = %lg\n", ret_data.data);
 
     return ret_data;
 }
 
-void SkipSpaces(const char** string) {
+void SkipSpaces(char** string) {
     printf("String in SkipSpaces before: <%s>\n", *string);
     while (*string && isspace(**string)) {
         (*string)++;
@@ -319,7 +325,7 @@ elem_t CalculateFunc(elem_t value, int func_id) {
     }
 }
 
-void PrintError(int err_id) {
+void PrintError(int err_id, char* string) {
     switch(err_id) {
         case MISSING_CLOSE_BRACKET:      printf("Missing close bracket: <%s>\n", string);                                   break;
         case DIVISION_BY_ZERO:           printf("Trying to divide by '0': <%s>\n", string);                                 break;

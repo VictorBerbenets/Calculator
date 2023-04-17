@@ -6,7 +6,7 @@
 
 static const int MAX_FILE_SIZE = 1111;
 
-char* GetData (const char *file) { 
+char* GetData (char *file) { 
     Validator(!file, "invalid file name", exit(EXIT_FAILURE););
 
     FILE* data_file = fopen(file, "r");
