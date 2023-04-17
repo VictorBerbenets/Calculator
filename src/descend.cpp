@@ -1,44 +1,7 @@
 #include "..//descend.h"
 
-typedef struct {
-    const char func_name[MaxFuncSize];
-    int func_id;
-} FuncInfo;
-
-enum FUNCTIONS {
-    SIN    = 0,
-    COS    = 1,
-    TG     = 2,
-    CTG    = 3,
-    SH     = 4,
-    CH     = 5,
-    TH     = 6,
-    CTH    = 7,
-    ARCSIN = 8,
-    ARCCOS = 9,
-    ARCTG  = 10,
-    ARCCTG = 11,
-    EXP    = 12,
-    LN     = 13,
-};
-
-FuncInfo Functions_[] = {{"sin", SIN}, {"cos", COS}, {"tg", TG}, {"ctg", CTG}, {"sh", SH}, {"ch", CH}, {"th", TH}, {"cth", CTH},
+const FuncInfo Functions_[] = {{"sin", SIN}, {"cos", COS}, {"tg", TG}, {"ctg", CTG}, {"sh", SH}, {"ch", CH}, {"th", TH}, {"cth", CTH},
                             {"arcsin", ARCSIN}, {"arccos", ARCCOS}, {"arctg", ARCTG}, {"arcctg", ARCCTG}, {"exp", EXP}, {"ln", LN}};
-
-int main (int argc, char** argv) {
-    if (argc > 2) {
-        printf("Too many file names, there can be only one:)\n");
-        return -1;
-    }    
-
-    char* save_alloc_addr = GetData(argv[1]);
-    char* string = save_alloc_addr;
-
-    printf("( %s ) = %lg\n", save_alloc_addr, GetG(&string));
-
-    free(save_alloc_addr);
-    return 0;
-}
 
 elem_t GetG(char** string) {
 

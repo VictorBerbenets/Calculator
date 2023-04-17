@@ -15,6 +15,28 @@ typedef struct {
     int err_flag  = 0;
 }value;
 
+typedef struct {
+    const char func_name[MaxFuncSize];
+    int func_id;
+} FuncInfo;
+
+enum FUNCTIONS {
+    SIN    = 0,
+    COS    = 1,
+    TG     = 2,
+    CTG    = 3,
+    SH     = 4,
+    CH     = 5,
+    TH     = 6,
+    CTH    = 7,
+    ARCSIN = 8,
+    ARCCOS = 9,
+    ARCTG  = 10,
+    ARCCTG = 11,
+    EXP    = 12,
+    LN     = 13,
+};
+
 enum Errors {
     DIVISION_BY_ZERO           = 1,
     MISSING_CLOSE_BRACKET      = 2,
