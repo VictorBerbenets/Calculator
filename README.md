@@ -1,5 +1,5 @@
 #   This is my calculator, writen by algorithm which called 'recursive-descend'
-## How to use this programm: 
+## How to use this program: 
 ### 1) Do git clone to your computer;
 ### 2) Write expression that you want to calculate in 'data.txt' file;
 ### 3) In the command line run next commands in order:
