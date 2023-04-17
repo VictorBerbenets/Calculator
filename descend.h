@@ -27,6 +27,7 @@ value  GetE();
 value  GetT();
 value  GetS();
 value  GetP();
+value GetF();
 value  GetN();
 
 void SkipSpaces(const char** string);
@@ -36,4 +37,8 @@ char* GetData (const char *file);
 int IsEqual(elem_t num1, elem_t num2);
 
 void PrintError(int err_id);
+
+int GetFuncId(char* func_name);
+
+elem_t CalculateFunc(elem_t value, int func_id);
 #endif

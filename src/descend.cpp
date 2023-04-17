@@ -2,6 +2,22 @@
 
 const char* string = NULL;
 
+typedef struct {
+    const char func_name[100];
+    int func_id;
+} FuncInfo;
+
+enum FUNCTIONS {
+    SIN = 0,
+    COS = 1,
+    TG  = 2,
+    CTG = 3,
+    SH  = 4,
+    CH  = 5,
+};
+
+FuncInfo Functions_[] = {{"sin", SIN}, {"cos", COS}, {"tg", TG}, {"ctg", CTG}, {"sh", SH}, {"ch", CH}};
+
 int main (int argc, char** argv) {
     if (argc > 2) {
         printf("Too many file names, there can be only one:)\n");
@@ -77,7 +93,7 @@ value GetT( ) {
 
         int save_symb = *string;
         string++;
-        printf("Calling GetP, current string: <%s>\n", string);
+        printf("Calling GetS, current string: <%s>\n", string);
 
         value number2 = GetS();
         if (number2.err_flag) {
@@ -88,7 +104,6 @@ value GetT( ) {
         }
         else {
             if (IsEqual(number2.data, 0)) {
-                // printf("AAAAAAAAAAAAAAAA\n");
                 number1.err_flag = DIVISION_BY_ZERO;
                 return number1;
             }
@@ -137,6 +152,31 @@ value  GetS() {
     return number1;
 }
 
+// value GetP() {
+    
+//     SkipSpaces(&string);
+//     printf("I am GetP, i got such string: <%s>\n", string);
+//     if (*string == '(') {
+//         string++;
+//         printf("Calling GetE, current string: <%s>\n", string);
+//         value data = GetE();
+//         if (*string != ')') {
+//             printf("Close bracket is missed: %s\n", string);
+//             data.err_flag = MISSING_CLOSE_BRACKET;
+//         }
+//         else {
+//             string++;
+//         }
+//         SkipSpaces(&string);
+
+//         printf("I am GetP, RETURN string: <%s>\n", string);
+
+//         return data;
+//     }
+//     printf("I am GetP, RETURN string: <%s>\n", string);
+//     return GetN();
+// }
+
 value GetP() {
     
     SkipSpaces(&string);
@@ -158,8 +198,46 @@ value GetP() {
 
         return data;
     }
-    printf("I am GetP, RETURN string: <%s>\n", string);
-    return GetN();
+    if (isdigit(*string)) {
+        printf("I am GetP,I call GetN, RETURN string: <%s>\n", string);
+        return GetN();
+    }
+    if (isalpha((*string))) {
+        printf("I am GetP,I call GetF, RETURN string: <%s>\n", string);
+
+        return GetF();
+    }
+}
+
+value GetF() {
+    char function_name[100] = {};
+    for(int i = 0; isalpha(*string) && i < 100; i++) {
+        function_name[i] = *string;
+        *string++;
+    }
+    int func_id = GetFuncId(function_name);
+
+    if (*string == '(') {
+        string++;
+        printf("Calling GetE, current string: <%s>\n", string);
+        value data = GetE();
+        if (*string != ')') {
+            printf("Close bracket is missed: %s\n", string);
+            data.err_flag = MISSING_CLOSE_BRACKET;
+        }
+        else {
+            string++;
+        }
+        SkipSpaces(&string);
+        data.data = CalculateFunc(data.data, func_id);
+        // printf("data.data")
+        printf("I am GetP, RETURN string: <%s>\n", string);
+        return data;
+    }
+    else {
+        printf("error\n");
+    }
+
 }
 
 value GetN() {
@@ -220,6 +298,25 @@ void SkipSpaces(const char** string) {
 int IsEqual(elem_t num1, elem_t num2) {
     const static elem_t Epsilon = 1e-17;
     return fabs(num1 - num2) <= Epsilon;
+}
+
+int GetFuncId(char* func_name) {
+    for (int i = 0; i < sizeof(Functions_)/sizeof(Functions_[0]); i++) {
+        if (!strcmp(func_name, Functions_[i].func_name)) {
+            return Functions_[i].func_id;
+        }
+    }
+    return -1;
+}
+
+elem_t CalculateFunc(elem_t value, int func_id) {
+    switch(func_id) {
+        case SIN: return sin(value);
+        case COS: return cos(value);
+        case TG : return tan(value);
+        case CTG: return 1/tan(value);
+        default : printf("Error func calculating\n");
+    }
 }
 
 void PrintError(int err_id) {

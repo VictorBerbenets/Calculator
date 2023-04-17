@@ -1,11 +1,10 @@
-
 #include "..//descend.h"
 #include "..//Validator.h"
 #include "..//colors.h"
 #include <sys/stat.h>
 #include <sys/types.h>
 
-static const int MAX_FILE_SIZE = 500;
+static const int MAX_FILE_SIZE = 1111;
 
 char* GetData (const char *file) { 
     Validator(!file, "invalid file name", exit(EXIT_FAILURE););
