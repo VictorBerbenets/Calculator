@@ -13,8 +13,7 @@ char* GetData (const char *file) {
 
     char* ret_string = (char*) calloc(MAX_FILE_SIZE, sizeof(char));
     fgets(ret_string, MAX_FILE_SIZE, data_file);
-    printf("strlen(ret_string) = %d\n", strlen(ret_string));
-    ret_string[strlen(ret_string) - 1] = '\0';
+    ret_string[strlen(ret_string)] = '\0';
     fclose(data_file);
 
     return (char*) ret_string;

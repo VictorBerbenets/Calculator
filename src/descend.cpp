@@ -3,7 +3,7 @@
 const char* string = NULL;
 
 typedef struct {
-    const char func_name[100];
+    const char func_name[MaxFuncSize];
     int func_id;
 } FuncInfo;
 
@@ -14,9 +14,18 @@ enum FUNCTIONS {
     CTG = 3,
     SH  = 4,
     CH  = 5,
+    TH  = 6,
+    CTH = 7,
+    ARCSIN = 8,
+    ARCCOS = 9,
+    ARCTG  = 10,
+    ARCCTG = 11,
+    EXP    = 12,
+    LN     = 13,
 };
 
-FuncInfo Functions_[] = {{"sin", SIN}, {"cos", COS}, {"tg", TG}, {"ctg", CTG}, {"sh", SH}, {"ch", CH}};
+FuncInfo Functions_[] = {{"sin", SIN}, {"cos", COS}, {"tg", TG}, {"ctg", CTG}, {"sh", SH}, {"ch", CH}, {"th", TH}, {"cth", CTH},
+                            {"arcsin", ARCSIN}, {"arccos", ARCCOS}, {"arctg", ARCTG}, {"arcctg", ARCCTG}, {"exp", EXP}, {"ln", LN}};
 
 int main (int argc, char** argv) {
     if (argc > 2) {
@@ -37,7 +46,10 @@ elem_t GetG() {
 
     SkipSpaces(&string);
     printf("I am GetG, i got such string: <%s>\n", string);
-
+    if(!strlen(string)) {
+        printf("String is empty\n");
+        exit(EXIT_FAILURE);
+    }
     value number = GetE();
     if (*string != '\0') {
         printf("Error: didn't get end simbol <%s>\n", string);
@@ -107,14 +119,9 @@ value GetT( ) {
                 number1.err_flag = DIVISION_BY_ZERO;
                 return number1;
             }
-                printf("AAAAAAAAAAAAAAAA\n");
-
             number1.data /= number2.data;
-
         }
         SkipSpaces(&string);
-
-
     }
     printf("I am GetT, RETURN string: <%s>\n", string);
 
@@ -152,31 +159,6 @@ value  GetS() {
     return number1;
 }
 
-// value GetP() {
-    
-//     SkipSpaces(&string);
-//     printf("I am GetP, i got such string: <%s>\n", string);
-//     if (*string == '(') {
-//         string++;
-//         printf("Calling GetE, current string: <%s>\n", string);
-//         value data = GetE();
-//         if (*string != ')') {
-//             printf("Close bracket is missed: %s\n", string);
-//             data.err_flag = MISSING_CLOSE_BRACKET;
-//         }
-//         else {
-//             string++;
-//         }
-//         SkipSpaces(&string);
-
-//         printf("I am GetP, RETURN string: <%s>\n", string);
-
-//         return data;
-//     }
-//     printf("I am GetP, RETURN string: <%s>\n", string);
-//     return GetN();
-// }
-
 value GetP() {
     
     SkipSpaces(&string);
@@ -210,17 +192,21 @@ value GetP() {
 }
 
 value GetF() {
-    char function_name[100] = {};
-    for(int i = 0; isalpha(*string) && i < 100; i++) {
-        function_name[i] = *string;
+    char function_name[MaxFuncSize] = {};
+    int symbol_counter = 0;
+    for( ; isalpha(*string) && symbol_counter < 100; symbol_counter++) {
+        function_name[symbol_counter] = *string;
         *string++;
     }
+    value data = {};
+    if (symbol_counter == MaxFuncSize) {
+        data.err_flag = INVALID_FUNCTION_NAME_SIZE;
+    }
     int func_id = GetFuncId(function_name);
-
     if (*string == '(') {
         string++;
         printf("Calling GetE, current string: <%s>\n", string);
-        value data = GetE();
+        data = GetE();
         if (*string != ')') {
             printf("Close bracket is missed: %s\n", string);
             data.err_flag = MISSING_CLOSE_BRACKET;
@@ -230,14 +216,13 @@ value GetF() {
         }
         SkipSpaces(&string);
         data.data = CalculateFunc(data.data, func_id);
-        // printf("data.data")
         printf("I am GetP, RETURN string: <%s>\n", string);
         return data;
     }
     else {
-        printf("error\n");
+        data.err_flag = INVALID_DATA;
+        return  data;
     }
-
 }
 
 value GetN() {
@@ -253,7 +238,12 @@ value GetN() {
         is_nagative = 1;
         string++;
     }
-
+    if (*string == 'P') {
+        ret_data.data = M_PI;
+        string++;
+        SkipSpaces(&string);
+        return ret_data;
+    }
     while (isdigit(*string)) { 
         inside_cicle  = 1;
         ret_data.data = ret_data.data*10 + (*string - '0');
@@ -311,19 +301,31 @@ int GetFuncId(char* func_name) {
 
 elem_t CalculateFunc(elem_t value, int func_id) {
     switch(func_id) {
-        case SIN: return sin(value);
-        case COS: return cos(value);
-        case TG : return tan(value);
-        case CTG: return 1/tan(value);
+        case SIN:    return sin(value);
+        case COS:    return cos(value);
+        case TG :    return tan(value);
+        case CTG:    return 1/tan(value);
+        case ARCSIN: return asin(value);
+        case ARCCOS: return acos(value);
+        case ARCTG:  return atan(value);
+        case ARCCTG: return M_PI/2 + atan(value);
+        case SH:     return sinh(value);
+        case CH:     return cosh(value);
+        case TH:     return tanh(value);
+        case CTH:    return 1/tanh(value);
+        case EXP:    return exp(value);
+        case LN:     return log(value);
         default : printf("Error func calculating\n");
     }
 }
 
 void PrintError(int err_id) {
     switch(err_id) {
-        case MISSING_CLOSE_BRACKET: printf("Missing close bracket: <%s>\n", string);   break;
-        case DIVISION_BY_ZERO:      printf("Trying to divide by '0': <%s>\n", string); break;
-        case UNEXPECTED_SYMBOL:     printf("Unexpected symbol: <%s>\n", string);       break;
+        case MISSING_CLOSE_BRACKET:      printf("Missing close bracket: <%s>\n", string);                                   break;
+        case DIVISION_BY_ZERO:           printf("Trying to divide by '0': <%s>\n", string);                                 break;
+        case UNEXPECTED_SYMBOL:          printf("Unexpected symbol: <%s>\n", string);                                       break;
+        case INVALID_DATA:               printf("Invalid data: <%s>\n", string);                                            break;
+        case INVALID_FUNCTION_NAME_SIZE: printf("Invalid function name size, it must be <= %d: %s\n", MaxFuncSize, string); break;
         default: printf("invalid err_id: %d\n", err_id);
     }
 }

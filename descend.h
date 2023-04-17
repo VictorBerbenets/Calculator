@@ -10,6 +10,8 @@
 
 typedef double elem_t;
 
+const int MaxFuncSize = 100;
+
 typedef struct {
     elem_t data   = 0;
     int err_flag  = 0;
@@ -17,9 +19,11 @@ typedef struct {
 
 enum Errors {
 
-    DIVISION_BY_ZERO      = 1,
-    MISSING_CLOSE_BRACKET = 2,
-    UNEXPECTED_SYMBOL     = 3,
+    DIVISION_BY_ZERO           = 1,
+    MISSING_CLOSE_BRACKET      = 2,
+    UNEXPECTED_SYMBOL          = 3,
+    INVALID_DATA               = 4,
+    INVALID_FUNCTION_NAME_SIZE = 5,
 };
 
 elem_t GetG();
